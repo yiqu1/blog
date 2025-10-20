@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-bus-depl
+spec:
+  replicas: 1
+  # Selects pods with label app=event-bus
+  selector:
+    matchLabels:
+      app: event-bus
+  template:
+    metadata:
+      # Sets label app=event-bus on pods
+      labels:
+        app: event-bus
+    spec:
+      containers:
+        - name: event-bus
+          image: yiqu1/event-bus
+---
+apiVersion: v1
+kind: Service
+# other pods reach event-bus pod via http://event-bus-srv:4005, not localhost
+metadata:
+  name: event-bus-srv
+spec:
+  # ClusterIP Service is default type, for pod-to-pod communication within the cluster
+  type: ClusterIP
+  # Selects pods with label app=event-bus
+  selector:
+    app: event-bus
+  ports:
+    - name: event-bus
+      protocol: TCP
+      # ClusterIP Service exposes this port, can be accessed internally within the cluster
+      port: 4005
+      # application listens on this port, ClusterIP forwards traffic to this port
+      targetPort: 4005

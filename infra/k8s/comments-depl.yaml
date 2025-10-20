@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-depl
+spec:
+  replicas: 1
+  # Selects pods with label app=comments
+  selector:
+    matchLabels:
+      app: comments
+  template:
+    metadata:
+      # Sets label app=comments on pods
+      labels:
+        app: comments
+    spec:
+      containers:
+        - name: comments
+          image: yiqu1/comments
+---
+apiVersion: v1
+kind: Service
+# other pods reach comments pod via http://comments-srv:4001, not localhost
+metadata:
+  name: comments-srv
+spec:
+  # ClusterIP Service is default type, for pod-to-pod communication within the cluster
+  type: ClusterIP
+  # Selects pods with label app=comments
+  selector:
+    app: comments
+  ports:
+    - name: comments
+      protocol: TCP
+      # ClusterIP Service exposes this port, can be accessed internally within the cluster
+      port: 4001
+      # application listens on this port, ClusterIP forwards traffic to this port
+      targetPort: 4001

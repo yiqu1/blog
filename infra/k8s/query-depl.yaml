@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: query-depl
+spec:
+  replicas: 1
+  # Selects pods with label app=query
+  selector:
+    matchLabels:
+      app: query
+  template:
+    metadata:
+      # Sets label app=query on pods
+      labels:
+        app: query
+    spec:
+      containers:
+        - name: query
+          image: yiqu1/query
+---
+apiVersion: v1
+kind: Service
+# other pods reach query pod via http://query-srv:4002, not localhost
+metadata:
+  name: query-srv
+spec:
+  # ClusterIP Service is default type, for pod-to-pod communication within the cluster
+  type: ClusterIP
+  # Selects pods with label app=query
+  selector:
+    app: query
+  ports:
+    - name: query
+      protocol: TCP
+      # ClusterIP Service exposes this port, can be accessed internally within the cluster
+      port: 4002
+      # application listens on this port, ClusterIP forwards traffic to this port
+      targetPort: 4002

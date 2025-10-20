@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: posts-depl
+spec:
+  replicas: 1
+  # Selects pods with label app=posts
+  selector:
+    matchLabels:
+      app: posts
+  template:
+    metadata:
+      # Sets label app=posts on pods
+      labels:
+        app: posts
+    spec:
+      containers:
+        - name: posts
+          image: yiqu1/posts
+---
+apiVersion: v1
+kind: Service
+# other pods reach posts pod via http://posts-clusterip-srv:4000, not localhost
+metadata:
+  name: posts-clusterip-srv
+spec:
+  type: ClusterIP
+  # Selects pods with label app=posts
+  selector:
+    app: posts
+  ports:
+    - name: posts
+      protocol: TCP
+      # ClusterIP Service exposes this port, can be accessed by pods within the cluster
+      port: 4000
+      # application listens on this port, ClusterIP forwards traffic to this port
+      targetPort: 4000

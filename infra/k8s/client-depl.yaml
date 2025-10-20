@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-depl
+spec:
+  replicas: 1
+  # Selects pods with label app=client
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      # Sets label app=client on pods
+      labels:
+        app: client
+    spec:
+      containers:
+        - name: client
+          image: yiqu1/client
+---
+apiVersion: v1
+kind: Service
+# other pods reach client pod via http://client-srv:5173, not localhost
+metadata:
+  name: client-srv
+spec:
+  # ClusterIP Service is default type, for pod-to-pod communication within the cluster
+  type: ClusterIP
+  # Selects pods with label app=client
+  selector:
+    app: client
+  ports:
+    - name: client
+      protocol: TCP
+      # ClusterIP Service exposes this port, can be accessed internally within the cluster
+      port: 5173
+      # application listens on this port, ClusterIP forwards traffic to this port
+      targetPort: 5173

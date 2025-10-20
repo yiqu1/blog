@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moderation-depl
+spec:
+  replicas: 1
+  # Selects pods with label app=moderation
+  selector:
+    matchLabels:
+      app: moderation
+  template:
+    metadata:
+      # Sets label app=moderation on pods
+      labels:
+        app: moderation
+    spec:
+      containers:
+        - name: moderation
+          image: yiqu1/moderation
+---
+apiVersion: v1
+kind: Service
+# other pods reach moderation pod via http://moderation-srv:4003, not localhost
+metadata:
+  name: moderation-srv
+spec:
+  # ClusterIP Service is default type, for pod-to-pod communication within the cluster
+  type: ClusterIP
+  # Selects pods with label app=moderation
+  selector:
+    app: moderation
+  ports:
+    - name: moderation
+      protocol: TCP
+      # ClusterIP Service exposes this port, can be accessed internally within the cluster
+      port: 4003
+      # application listens on this port, ClusterIP forwards traffic to this port
+      targetPort: 4003

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: posts-srv
+spec:
+  type: NodePort
+  # Selects pods with label app=posts
+  selector:
+    app: posts
+  ports:
+    - name: posts
+      protocol: TCP
+      # Node Port Service expoese this port, can be accessed externally
+      port: 4000
+      # application listens on this port, Node Port(actual port on browser,3XXXX) forwards traffic to this port
+      targetPort: 4000
